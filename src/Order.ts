@@ -1,18 +1,32 @@
 import Item from "./Item";
+import Product from "./Product";
+import Discount from "./Discount";
 
 export default class Order {
     items: Item[] = [];
-    discount: Number;
+    discount: number;
+
+    private _discountHandler : Discount;
 
     constructor() {
-
+        this._discountHandler = new Discount();
     }
 
-    applyDiscount(percentage: Number) {
-        
+    addItem(product: Product, amount: number) {
+        this.items.push(new Item(product, amount));
     }
 
-    calculatePrice(){
+  
 
+    private sumItemsPrice() {
+        if (!this.items || this.items.length === 0)
+            return 0;
+        return this.items.map(i => i.calculatePrice()).reduce((a, b) => a + b);
+    }
+
+    calculatePrice(discountCode: String = null) {
+        const discountPercentage = this._discountHandler.validateCoupon(discountCode);
+        const totalItemsPrice = this.sumItemsPrice();
+        return this._discountHandler.applyDiscount(discountPercentage, totalItemsPrice);
     }
 }
